@@ -69,8 +69,11 @@ def update_file(file_path, final_path):
     delete_file(final_path)
     copy_file(file_path, final_path)
 
+def rename_item(file_path, final_path):
+    os.rename(final_path, file_path)
+
 def remove_folder(folder_path):
-    shutil.rmtree(folder_path)
+    shutil.rmtree(folder_path, onerror = on_rm_error )
 
 def copy_folder(folder_path, final_path):
     if os.path.isdir(final_path):
@@ -88,17 +91,21 @@ while True:
         # so it will be false in every situation if it wasn't like this
         print(f"'{file}' {'Renamed To' if changeMethod == 'Renamed from something' else '' if changeMethod == 'Renamed to something' else changeMethod}")
         if os.path.isdir(FILE_BACKUP_PATH) or os.path.isdir(file):
-            if changeMethod == "Created" or changeMethod == "Renamed to something":
+            if changeMethod == "Created":
                 copy_folder(file, FILE_BACKUP_PATH)
-            elif changeMethod == "Deleted" or changeMethod == "Renamed from something":
+            elif changeMethod == "Deleted":
                 remove_folder(FILE_BACKUP_PATH)
+            elif changeMethod == "Renamed from something":
+                rename_item(changed_files[1][0].replace(PROJECTS_PATH, BACKUP_PATH), FILE_BACKUP_PATH)
 
         elif os.path.isfile(FILE_BACKUP_PATH) or os.path.isfile(file):
-            if changeMethod == "Created" or changeMethod == "Renamed to something":
+            if changeMethod == "Created":
                 copy_file(file, FILE_BACKUP_PATH)
-            elif changeMethod == "Deleted" or changeMethod == "Renamed from something":
+            elif changeMethod == "Deleted":
                 delete_file(FILE_BACKUP_PATH)
             elif changeMethod == "Updated":
                 update_file(file, FILE_BACKUP_PATH)
+            elif changeMethod == "Renamed from something":
+                rename_item(changed_files[1][0].replace(PROJECTS_PATH, BACKUP_PATH), FILE_BACKUP_PATH)
         
     time.sleep(.5)
